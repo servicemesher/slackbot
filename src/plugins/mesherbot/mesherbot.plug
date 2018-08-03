@@ -1,0 +1,9 @@
+[Core]
+Name = Bot for ServiceMesher
+Module = mesherbot
+
+[Documentation]
+Description = Helper for meshers
+
+[Python]
+Version = 3
