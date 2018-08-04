@@ -1,0 +1,10 @@
+*.swap
+*.swp
+.DS_Store
+--*
+*.pyc
+data
+*.log
+config.py
+*.pid
+

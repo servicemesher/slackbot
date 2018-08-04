@@ -90,7 +90,7 @@ class mesherbot(BotPlugin):
             count += 1
             if count <= RESULT_COUNT or (not msg.is_group):
                 yield(issue.html_url)
-        yield("Totle results {}".format(count))
+        yield("Total results {}".format(count))
 
     @arg_botcmd('issue_id', type=int)
     def confirm_issue(self, msg, issue_id):
@@ -130,7 +130,7 @@ class mesherbot(BotPlugin):
             count += 1
             if count <= RESULT_COUNT or (not msg.is_group):
                 yield(issue.html_url)
-        yield("Totle results {}".format(count))
+        yield("Total results {}".format(count))
 
     @arg_botcmd('query', type=str)
     def search_issues(self, msg, query):
@@ -143,7 +143,7 @@ class mesherbot(BotPlugin):
         for issue in issue_list:
             if count <= RESULT_COUNT or (not msg.is_group):
                 yield(issue.html_url)
-        yield("Totle results {}".format(count))
+        yield("Total results {}".format(count))
 
     @arg_botcmd('issue_id', type=int)
     @arg_botcmd('--comment', type=str)
@@ -205,12 +205,12 @@ class mesherbot(BotPlugin):
     @botcmd
     def commands(self, msg, args):
         yield("**可用命令说明**")
-        yield("`github bind [token]`：绑定 github token 才能正常使用， **必须在私聊窗口中使用** ，Token 需要权限 `read:user, repo, write:discussion`")
-        yield("`whatsnew`：查找 `welcome` 标签的新 Issue")
-        yield("`github whoami`：显示 Github 账号绑定信息")
-        yield("`label issue [issue-id] --label [label-text]`：为指定 Issue 添加标签")
-        yield("`comment issue [issue-id] --comment [comment]`：为指定 Issue 添加 Comment")
-        yield("`search issues [query]`：搜索 Issue，使用[官方查询语法](https://help.github.com/articles/searching-issues-and-pull-requests/)")
-        yield("`search title [title]`：根据标题搜索 Issue")
-        yield("`file issue [file name]`：根据文件名创建 Issue，文件名形如： `content/docs/..`")
-        yield("`confirm issue [issue id]`：确认将新 Issue 转入 Pending 状态")
+        yield("`!github bind [token]`：绑定 github token 才能正常使用， **必须在私聊窗口中使用** ，Token 需要权限 `read:user, repo, write:discussion`")
+        yield("`!whatsnew`：查找 `welcome` 标签的新 Issue")
+        yield("`!github whoami`：显示 Github 账号绑定信息")
+        yield("`!label issue [issue-id] --label [label-text]`：为指定 Issue 添加标签")
+        yield("`!comment issue [issue-id] --comment [comment]`：为指定 Issue 添加 Comment")
+        yield("`!search issues [query]`：搜索 Issue，使用[官方查询语法](https://help.github.com/articles/searching-issues-and-pull-requests/)")
+        yield("`!search title [title]`：根据标题搜索 Issue")
+        yield("`!file issue [file name]`：根据文件名创建 Issue，文件名形如： `content/docs/..`")
+        yield("`!confirm issue [issue id]`：确认将新 Issue 转入 Pending 状态")
