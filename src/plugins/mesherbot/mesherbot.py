@@ -3,10 +3,12 @@ from errbot import BotPlugin, botcmd, arg_botcmd
 import github
 import re
 import os
+import json
 
 REPO = os.getenv("REPOSITORY")
 RESULT_COUNT =  int(os.getenv("RESULT_COUNT"))
 DIFF = os.getenv("DIFF_FILE")
+DICT = os.getenv("DICT")
 
 
 def filename_to_source_url(filename):
@@ -214,3 +216,12 @@ class mesherbot(BotPlugin):
         yield("`!search title [title]`：根据标题搜索 Issue")
         yield("`!file issue [file name]`：根据文件名创建 Issue，文件名形如： `content/docs/..`")
         yield("`!confirm issue [issue id]`：确认将新 Issue 转入 Pending 状态")
+
+    @arg_botcmd('term', type=str)
+    def search_term(self, msg, term):
+        with open(DICT, "r") as file:
+            dic = json.load(file)
+            for key in dic.keys():
+                if key.find(term) >= 0:
+                    return key + ":" + dic.get(key)
+        return "Found nothing."
