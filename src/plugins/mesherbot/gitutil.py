@@ -29,9 +29,11 @@ def get_labels(issue):
         name_list.append(label_obj.name)
     return name_list
 
-def search_dupe_file_issue(repo, file_name):
-    query_str = "is:issue state:open in:title {}".format(file_name.strip("/"))
-    res = repo.search_issues(query_str)
+
+def search_dupe_file_issue(client, repo, file_name):
+    query_str = "repo:{} is:issue state:open in:title {}".format(
+        repo, file_name.strip("/"))
+    res = client.search_issues(query_str)
     dupe = []
     for issue in res:
         dupe.append(issue)

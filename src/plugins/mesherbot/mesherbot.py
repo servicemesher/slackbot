@@ -208,7 +208,7 @@ class mesherbot(BotPlugin):
         issue_count = 0
         for filename in new_file_list:
             time.sleep(SLEEP)
-            if (len(gitutil.search_dupe_file_issue(repo, filename)) > 0):
+            if (len(gitutil.search_dupe_file_issue(client, REPO, filename)) > 0):
                 yield(filename + " duplicated.")
                 continue
             title = filename
@@ -236,7 +236,7 @@ class mesherbot(BotPlugin):
             if (create_issue != 0):
                 title = filename
                 time.sleep(SLEEP)
-                if (len(gitutil.search_dupe_file_issue(repo, filename)) > 0):
+                if (len(gitutil.search_dupe_file_issue(client, REPO, filename)) > 0):
                     yield("{} duplicated.".format(filename))
                     continue
                 body = "文件路径：{}\n\n[源码]({})\n\n[网址]({})".format(
