@@ -176,6 +176,9 @@ class mesherbot(BotPlugin):
         yield("`search title [title]`：根据标题搜索 Issue")
         yield("`file issue [file name]`：根据文件名创建 Issue，文件名形如： `content/docs/..`")
         yield("`confirm issue [issue id]`：确认将新 Issue 转入 Pending 状态")
+        yield("`find new files [--create_issue]`：查找中文版中缺失的英文版文件，如果 --create_issue=1，则根据文件名称新建 Issue。")
+        yield("`find update files [--create_issue]`：中文版文件最后一次 Commit 之后，对应英文版发生更新的文件列表。如果 --create_issue=1，则根据文件名称新建 Issue。")
+        yield("`update repository`：更新代码库。")
 
     @arg_botcmd('term', type=str)
     def search_term(self, msg, term):
@@ -205,7 +208,8 @@ class mesherbot(BotPlugin):
         issue_count = 0
         for filename in new_file_list:
             time.sleep(SLEEP)
-            if (len(gitutil.search_dupe_file_issue(client, filename)) > 0):
+            if (len(gitutil.search_dupe_file_issue(repo, filename)) > 0):
+                yield(filename + " duplicated.")
                 continue
             title = filename
             body = "文件路径：{}\n\n[源码]({})\n\n[网址]({})".format(
@@ -232,7 +236,7 @@ class mesherbot(BotPlugin):
             if (create_issue != 0):
                 title = filename
                 time.sleep(SLEEP)
-                if (len(gitutil.search_dupe_file_issue(client, filename)) > 0):
+                if (len(gitutil.search_dupe_file_issue(repo, filename)) > 0):
                     yield("{} duplicated.".format(filename))
                     continue
                 body = "文件路径：{}\n\n[源码]({})\n\n[网址]({})".format(
