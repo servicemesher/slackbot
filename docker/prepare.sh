@@ -1,10 +1,10 @@
 #!/bin/sh
 set -xe
-apk add supervisor python3 --update
+apk add supervisor python3 git --update
 apk add python3-dev musl-dev gcc libffi-dev openssl-dev
 pip3 install --upgrade pip
-pip3 install PyGithub errbot
-pip3 install sleekxmpp pyasn1 pyasn1-modules irc hypchat \
+pip3 install  --no-cache-dir PyGithub errbot
+pip3 install  --no-cache-dir sleekxmpp pyasn1 pyasn1-modules irc hypchat \
   slackclient python-telegram-bot prometheus_client
 
 apk del musl-dev gcc libffi-dev --purge

@@ -4,40 +4,15 @@ import github
 import re
 import os
 import json
+import gitutil
+import gitscan
+import time
 
 REPO = os.getenv("REPOSITORY")
-RESULT_COUNT =  int(os.getenv("RESULT_COUNT"))
-DIFF = os.getenv("DIFF_FILE")
+LOCAL_REPO = os.getenv("LOCAL_REPO")
+RESULT_COUNT = int(os.getenv("RESULT_COUNT"))
 DICT = os.getenv("DICT")
-
-
-def filename_to_source_url(filename):
-    return "{}/{}".format(
-        "https://github.com/istio/istio.github.io/tree/master",
-        filename
-    )
-
-
-def filename_to_web_url(filename):
-    regex = r"^(content(_zh)?)(.*?).md"
-    res = re.search(regex, filename)
-    if res is None:
-        return ""
-    name = res.group(3)
-    prefix = res.group(1)
-    if prefix == "content":
-        return "https://istio.io/{}{}".format(name, ".htm")
-    else:
-        return "https://istio.io/zh/{}{}".format(name, ".htm")
-
-
-def get_labels(issue):
-    label_list = issue.get_labels()
-    name_list = []
-    for label_obj in label_list:
-        name_list.append(label_obj.name)
-    return name_list
-
+SLEEP = 2
 
 class mesherbot(BotPlugin):
     """
@@ -65,10 +40,10 @@ class mesherbot(BotPlugin):
     def github_whoami(self, msg, args):
         from_user = msg.frm.person
         try:
-            yield("Github Token:" + self[from_user + "github_token"])
-            yield("Github Login:" + self[from_user + "github_login"])
+            yield("**Github Token:**" + self[from_user + "github_token"])
+            yield("**Github Login:**" + self[from_user + "github_login"])
         except:
-            yield("Bind your Github token please.")
+            yield("**Bind your Github token please.**")
 
     def github_binded(self, person):
         result = True
@@ -101,7 +76,7 @@ class mesherbot(BotPlugin):
         client = github.Github(self[msg.frm.person + "github_token"])
         repo = client.get_repo(REPO)
         issue = repo.get_issue(issue_id)
-        label_list = get_labels(issue)
+        label_list = gitutil.get_labels(issue)
         if "welcome" not in label_list or issue.state != "open":
             return "This is not a new issue"
         issue.remove_from_labels("welcome")
@@ -173,21 +148,6 @@ class mesherbot(BotPlugin):
         yield("Label added to")
         yield(issue.html_url)
 
-    @botcmd
-    def mesher_sync_list(self, msg, args):
-        regex = r"^(content(_zh)?)\/(.*?)\s+\|\s+(\d+)"
-        with open(DIFF) as diff:
-            for line in diff:
-                line = line.strip()
-                res = re.search(regex, line)
-                if res == None:
-                    yield("-1\t" + line)
-                    continue
-                filename = "{}/{}".format(res.group(1), res.group(3))
-                yield("{}\t{}/{}".format(res.group(4), res.group(1), res.group(3), ))
-                yield("\t" + filename_to_source_url(filename))
-                yield("\t" + filename_to_web_url(filename))
-
     @arg_botcmd('filename', type=str)
     def file_issue(self, msg, filename):
         if not self.github_binded(msg.frm.person):
@@ -196,8 +156,8 @@ class mesherbot(BotPlugin):
         repo = client.get_repo(REPO)
         title = filename
         body = "文件路径：{}\n\n[源码]({})\n\n[网址]({})".format(
-            filename, filename_to_source_url(filename),
-            filename_to_web_url(filename)
+            filename, gitutil.filename_to_source_url(filename),
+            gitutil.filename_to_web_url(filename)
         )
         issue = repo.create_issue(title, body)
         if issue != None:
@@ -207,15 +167,15 @@ class mesherbot(BotPlugin):
     @botcmd
     def commands(self, msg, args):
         yield("**可用命令说明**")
-        yield("`!github bind [token]`：绑定 github token 才能正常使用， **必须在私聊窗口中使用** ，Token 需要权限 `read:user, repo, write:discussion`")
-        yield("`!whatsnew`：查找 `welcome` 标签的新 Issue")
-        yield("`!github whoami`：显示 Github 账号绑定信息")
-        yield("`!label issue [issue-id] --label [label-text]`：为指定 Issue 添加标签")
-        yield("`!comment issue [issue-id] --comment [comment]`：为指定 Issue 添加 Comment")
-        yield("`!search issues [query]`：搜索 Issue，使用[官方查询语法](https://help.github.com/articles/searching-issues-and-pull-requests/)")
-        yield("`!search title [title]`：根据标题搜索 Issue")
-        yield("`!file issue [file name]`：根据文件名创建 Issue，文件名形如： `content/docs/..`")
-        yield("`!confirm issue [issue id]`：确认将新 Issue 转入 Pending 状态")
+        yield("`github bind [token]`：绑定 github token 才能正常使用， **必须在私聊窗口中使用** ，Token 需要权限 `read:user, repo, write:discussion`")
+        yield("`whatsnew`：查找 `welcome` 标签的新 Issue")
+        yield("`github whoami`：显示 Github 账号绑定信息")
+        yield("`label issue [issue-id] --label [label-text]`：为指定 Issue 添加标签")
+        yield("`comment issue [issue-id] --comment [comment]`：为指定 Issue 添加 Comment")
+        yield("`search issues [query]`：搜索 Issue，使用[官方查询语法](https://help.github.com/articles/searching-issues-and-pull-requests/)")
+        yield("`search title [title]`：根据标题搜索 Issue")
+        yield("`file issue [file name]`：根据文件名创建 Issue，文件名形如： `content/docs/..`")
+        yield("`confirm issue [issue id]`：确认将新 Issue 转入 Pending 状态")
 
     @arg_botcmd('term', type=str)
     def search_term(self, msg, term):
@@ -223,5 +183,72 @@ class mesherbot(BotPlugin):
             dic = json.load(file)
             for key in dic.keys():
                 if key.find(term) >= 0:
-                    return key + ":" + dic.get(key)
+                    return "**{}**：{}".format(key, dic.get(key))
         return "Found nothing."
+
+    @botcmd
+    def update_repository(self, msg, args):
+        return gitscan.update_repo(LOCAL_REPO)
+
+    @arg_botcmd('--create_issue', type=int, default=0)
+    def find_new_files(self, msg, create_issue):
+        if not self.github_binded(msg.frm.person):
+            return "Bind your Github token please."
+        client = github.Github(self[msg.frm.person + "github_token"])
+        repo = client.get_repo(REPO)
+        new_file_list = gitscan.find_new_files(LOCAL_REPO)
+        if create_issue == 0:
+            for filename in new_file_list:
+                yield(filename)
+            yield("{} files created".format(len(new_file_list)))
+            return
+        issue_count = 0
+        for filename in new_file_list:
+            time.sleep(SLEEP)
+            if (len(gitutil.search_dupe_file_issue(client, filename)) > 0):
+                continue
+            title = filename
+            body = "文件路径：{}\n\n[源码]({})\n\n[网址]({})".format(
+                filename, gitutil.filename_to_source_url(filename),
+                gitutil.filename_to_web_url(filename)
+            )
+            
+            issue = repo.create_issue(title, body)
+            issue.add_to_labels("sync/new")
+            issue_count += 1
+        yield("{} issues had been created.".format(issue_count))
+
+    @arg_botcmd('--create_issue', type=int, default=0)
+    def find_update_files(self, msg, create_issue):
+        if not self.github_binded(msg.frm.person):
+            return "Bind your Github token please."
+        client = github.Github(self[msg.frm.person + "github_token"])
+        repo = client.get_repo(REPO)
+        update_list = gitscan.find_updated_files(LOCAL_REPO)
+        message = ""
+        issue_count = 0
+        for filename in update_list.keys():
+            diff = update_list.get(filename)
+            if (create_issue != 0):
+                title = filename
+                time.sleep(SLEEP)
+                if (len(gitutil.search_dupe_file_issue(client, filename)) > 0):
+                    yield("{} duplicated.".format(filename))
+                    continue
+                body = "文件路径：{}\n\n[源码]({})\n\n[网址]({})".format(
+                    filename, gitutil.filename_to_source_url(
+                        filename),
+                    gitutil.filename_to_web_url(
+                        filename)
+                )
+                body += "\n\n ```diff\n{}\n```\n\n".format(
+                    update_list.get(filename).get("diff"))
+                issue = repo.create_issue(title, body)
+                issue.add_to_labels("sync/update")
+                issue_count += 1
+        if (create_issue != 0):
+            yield("{} issues had been created.".format(issue_count))
+        if (create_issue == 0):
+            yield(
+                "{} files updated.".format(len(update_list))
+            )
