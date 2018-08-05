@@ -216,7 +216,6 @@ class mesherbot(BotPlugin):
                 filename, gitutil.filename_to_source_url(filename),
                 gitutil.filename_to_web_url(filename)
             )
-            
             issue = repo.create_issue(title, body)
             issue.add_to_labels("sync/new")
             issue_count += 1

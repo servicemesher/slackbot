@@ -31,7 +31,7 @@ def get_labels(issue):
 
 
 def search_dupe_file_issue(client, repo, file_name):
-    query_str = "repo:{} is:issue state:open in:title {}".format(
+    query_str = "repo:{} type:issue is:open in:title {}".format(
         repo, file_name.strip("/"))
     res = client.search_issues(query_str)
     dupe = []
