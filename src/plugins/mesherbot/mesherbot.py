@@ -265,7 +265,7 @@ class mesherbot(BotPlugin):
         if not self.github_binded(msg.frm.person):
             return "Bind your Github token please."        
         client = github.Github(self[msg.frm.person + "github_token"])
-        repo = client.get_repo(REPO)            
+        repo = client.get_repo(repository)
         result = gitscan.get_release(repo, count)
         for release in result:
             yield("{}: {}".format(release.title, release.html_url))
