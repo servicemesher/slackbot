@@ -15,10 +15,9 @@ def update_repo(REPO):
     os.chdir(REPO)
     try:
         msg = subprocess.check_output(["git", "pull"])
-        yield(msg)
     finally:
         os.chdir(pwd)
-
+    return msg
 
 def find_orphan_files(REPO):
     pwd = os.curdir

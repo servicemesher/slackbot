@@ -250,6 +250,8 @@ class mesherbot(BotPlugin):
                 issue.add_to_labels("sync/update")
                 issue_count += 1
                 yield(issue.html_url)
+            else:
+                yield(filename)
         if (create_issue != 0):
             yield("{} issues had been created.".format(issue_count))
         if (create_issue == 0):
