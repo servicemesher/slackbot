@@ -262,6 +262,10 @@ class mesherbot(BotPlugin):
     @arg_botcmd('repository', type=str)
     @arg_botcmd('--count', type=int, default=10)
     def list_release(self, msg, repository, count):
-        result = gitscan.get_release()
+        if not self.github_binded(msg.frm.person):
+            return "Bind your Github token please."        
+        client = github.Github(self[msg.frm.person + "github_token"])
+        repo = client.get_repo(REPO)            
+        result = gitscan.get_release(repo, count)
         for release in result:
             yield("{}: {}".format(release.title, release.html_url))
