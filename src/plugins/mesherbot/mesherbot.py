@@ -249,6 +249,7 @@ class mesherbot(BotPlugin):
                 issue = repo.create_issue(title, body)
                 issue.add_to_labels("sync/update")
                 issue_count += 1
+                yield(issue.html_url)
         if (create_issue != 0):
             yield("{} issues had been created.".format(issue_count))
         if (create_issue == 0):
