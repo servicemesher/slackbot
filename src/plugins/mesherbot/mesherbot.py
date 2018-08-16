@@ -167,19 +167,19 @@ class mesherbot(BotPlugin):
     @botcmd
     def commands(self, msg, args):
         yield("**可用命令说明**")
-        yield("`github bind [token]`：绑定 github token 才能正常使用， **必须在私聊窗口中使用** ，Token 需要权限 `read:user, repo, write:discussion`")
-        yield("`whatsnew`：查找 `welcome` 标签的新 Issue")
-        yield("`github whoami`：显示 Github 账号绑定信息")
-        yield("`label issue [issue-id] --label [label-text]`：为指定 Issue 添加标签")
         yield("`comment issue [issue-id] --comment [comment]`：为指定 Issue 添加 Comment")
-        yield("`search issues [query]`：搜索 Issue，使用[官方查询语法](https://help.github.com/articles/searching-issues-and-pull-requests/)")
-        yield("`search title [title]`：根据标题搜索 Issue")
-        yield("`file issue [file name]`：根据文件名创建 Issue，文件名形如： `content/docs/..`")
         yield("`confirm issue [issue id]`：确认将新 Issue 转入 Pending 状态")
+        yield("`file issue [file name]`：根据文件名创建 Issue，文件名形如： `content/docs/..`")
         yield("`find new files [--create_issue]`：查找中文版中缺失的英文版文件，如果 --create_issue=1，则根据文件名称新建 Issue。")
         yield("`find update files [--create_issue]`：中文版文件最后一次 Commit 之后，对应英文版发生更新的文件列表。如果 --create_issue=1，则根据文件名称新建 Issue。")
+        yield("`github bind [token]`：绑定 github token 才能正常使用， **必须在私聊窗口中使用** ，Token 需要权限 `read:user, repo, write:discussion`")
+        yield("`github whoami`：显示 Github 账号绑定信息")
+        yield("`label issue [issue-id] --label [label-text]`：为指定 Issue 添加标签")        
+        yield("`search issues [query]`：搜索 Issue，使用[官方查询语法](https://help.github.com/articles/searching-issues-and-pull-requests/)")
+        yield("`search title [title]`：根据标题搜索 Issue")
         yield("`update repository`：更新代码库。")
-
+        yield("`whatsnew`：查找 `welcome` 标签的新 Issue")
+        yield("`list release [repository] --count`：列出指定仓库的最新 Release。")
     @arg_botcmd('term', type=str)
     def search_term(self, msg, term):
         with open(DICT, "r") as file:
@@ -258,3 +258,10 @@ class mesherbot(BotPlugin):
             yield(
                 "{} files updated.".format(len(update_list))
             )
+
+    @arg_botcmd('repository', type=str)
+    @arg_botcmd('--count', type=int, default=10)
+    def list_release(self, msg, repository, count):
+        result = gitscan.get_release()
+        for release in result:
+            yield("{}: {}".format(release.title, release.html_url))

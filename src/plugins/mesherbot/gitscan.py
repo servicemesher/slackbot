@@ -78,3 +78,12 @@ def find_updated_files(REPO):
             result[en_filename] = {"diff": diff_content}
     os.chdir(pwd)
     return result
+
+    def get_release(repository, count):
+        release_list = repository.get_releases()
+        result_list = []
+        for release in release_list:
+            result_list.append(release)
+            if len(result) >= count and count != 0:
+                break
+        return result_list
