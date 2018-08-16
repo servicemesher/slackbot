@@ -14,7 +14,7 @@ def update_repo(REPO):
     pwd = os.curdir
     os.chdir(REPO)
     try:
-        subprocess.check_call(["git", "pull"])
+        yield(subprocess.check_output(["git", "pull"]))
     finally:
         os.chdir(pwd)
 
