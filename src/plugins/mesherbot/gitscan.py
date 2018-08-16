@@ -84,6 +84,6 @@ def get_release(repository, count):
     result_list = []
     for release in release_list:
         result_list.append(release)
-        if len(result) >= count and count != 0:
+        if len(result_list) >= count and count != 0:
             break
     return result_list
