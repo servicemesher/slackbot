@@ -40,10 +40,12 @@ class mesherbot(BotPlugin):
     def github_whoami(self, msg, args):
         from_user = msg.frm.person
         try:
-            yield("**Github Token:**" + self[from_user + "github_token"])
-            yield("**Github Login:**" + self[from_user + "github_login"])
+            message = "**Github Token: {}**\n\n**Github Login:**: {}"
+            message = message.format(self[from_user + "github_token"], 
+            self[from_user + "github_login"])
         except:
-            yield("**Bind your Github token please.**")
+            message = "**Bind your Github token please.**"
+        return message
 
     def github_binded(self, person):
         result = True
@@ -63,11 +65,12 @@ class mesherbot(BotPlugin):
                                       state="open",
                                       labels=[repo.get_label("welcome")])
         count = 0
+        id_list = []
         for issue in issues_list:
             count += 1
             if count <= RESULT_COUNT or (not msg.is_group):
-                yield(issue.html_url)
-        yield("Total results {}".format(count))
+                id_list.append(issue.number)
+        return(" ".join(id_list)) 
 
     @arg_botcmd('issue_id', type=int)
     def confirm_issue(self, msg, issue_id):
@@ -81,7 +84,7 @@ class mesherbot(BotPlugin):
             return "This is not a new issue"
         issue.remove_from_labels("welcome")
         issue.add_to_labels("pending")
-        yield(issue.html_url)
+        return issue.html_url
 
     @arg_botcmd('--title', dest='title', type=str)
     @arg_botcmd('--body', dest='body', type=str)
@@ -92,8 +95,7 @@ class mesherbot(BotPlugin):
         repo = client.get_repo(REPO)
         issue = repo.create_issue(title, body)
         if issue != None:
-            yield("New issue created")
-            yield(issue.html_url)
+            return("New issue created: [{}]({})".format(title, issue.html_url))
 
     @arg_botcmd('title', type=str)
     def search_title(self, msg, title):
@@ -103,6 +105,7 @@ class mesherbot(BotPlugin):
         issue_list = client.search_issues(
             "{} in:title type:issue repo:{}".format(title, REPO))
         count = 0
+        issue_list = []
         for issue in issue_list:
             count += 1
             if count <= RESULT_COUNT or (not msg.is_group):
